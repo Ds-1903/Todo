@@ -106,7 +106,7 @@ export const login = async (
         });
       }
 
-      const { password, ...userWithoutPassword } = user[0].toObject();
+      const { password,createdAt, deletedAt,__v, ...userWithoutPassword } = user[0].toObject();
 
       //generate token
       userWithoutPassword.token = await generateToken(user[0]);

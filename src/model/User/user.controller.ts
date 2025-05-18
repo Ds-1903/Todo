@@ -40,15 +40,15 @@ export const login = async (
     const { success, data } = await userService.login(body);
 
     return res.send({
+      success,
       message: success ? "User loggedIn successfully" : "Something went wrong",
       data: data || [],
-      success,
     });
   } catch (error: any) {
     return res.status(500).send({
+      success: false,
       message: error.message || "Internal server error",
       data: [],
-      success: false,
     });
   }
 };
