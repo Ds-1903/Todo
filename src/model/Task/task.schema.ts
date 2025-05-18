@@ -31,4 +31,4 @@ const todoSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const Todo = mongoose.model("tasks", todoSchema);
+export const Task = mongoose.model("tasks", todoSchema);

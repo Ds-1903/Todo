@@ -1,5 +1,5 @@
 import mongoose, { ObjectId } from "mongoose";
-import { Todo } from "./task.schema.js";
+import { Task } from "./task.schema.js";
 
 
 interface ReturnResponse {
@@ -8,11 +8,11 @@ interface ReturnResponse {
     data: any;
   }
   
-export const addTask = (body: any): Promise<ReturnResponse>  => {
+export const addTask = (body: object): Promise<ReturnResponse>  => {
   return new Promise((resolve, reject) => {
     try {
 
-      const result = new Todo(body);
+      const result = new Task(body);
 
       result.save();
 
@@ -35,7 +35,7 @@ export const getAllTask = (userId:ObjectId):Promise<ReturnResponse> =>{
      try {
 
 
-      const result = await Todo.find({user_id : userId, is_deleted:false},{user_id:0, is_deleted:0, createdAt:0, updatedAt:0, __v:0})
+      const result = await Task.find({user_id : userId, is_deleted:false},{user_id:0, is_deleted:0, createdAt:0, updatedAt:0, __v:0})
 
       if (result) {
         resolve({ success: true, data: result });
@@ -48,11 +48,11 @@ export const getAllTask = (userId:ObjectId):Promise<ReturnResponse> =>{
   })
 }
 
-export const getTaskById = (taskId:ObjectId):Promise<ReturnResponse> =>{
+export const getTaskById = (taskId:string):Promise<ReturnResponse> =>{
   return new Promise(async (resolve, reject) => {
      try {
 
-      const result = await Todo.find({_id:  new mongoose.Types.ObjectId(taskId)})
+      const result = await Task.find({_id:  new mongoose.Types.ObjectId(taskId)})
 
       if (result) {
         resolve({ success: true, data: [] });
@@ -66,7 +66,7 @@ export const getTaskById = (taskId:ObjectId):Promise<ReturnResponse> =>{
 }
 
 
-export const updateTask = (body: any, taskId: ObjectId): Promise<ReturnResponse> => {
+export const updateTask = (body: object, taskId: string): Promise<ReturnResponse> => {
   return new Promise(async (resolve, reject) => {
     try {
       const { success: existSuccess } = await getTaskById(taskId);
@@ -78,7 +78,7 @@ export const updateTask = (body: any, taskId: ObjectId): Promise<ReturnResponse>
         });
       }
 
-      const result = await Todo.findByIdAndUpdate(
+      const result = await Task.findByIdAndUpdate(
         taskId,
         body,
         { new: true } 
@@ -97,7 +97,7 @@ export const updateTask = (body: any, taskId: ObjectId): Promise<ReturnResponse>
   });
 };
 
-export const deleteTask = (taskId: ObjectId): Promise<ReturnResponse> => {
+export const deleteTask = (taskId: string): Promise<ReturnResponse> => {
   return new Promise(async (resolve, reject) => {
     try {
       const { success: existSuccess } = await getTaskById(taskId);
@@ -109,7 +109,7 @@ export const deleteTask = (taskId: ObjectId): Promise<ReturnResponse> => {
         });
       }
 
-      const result = await Todo.findByIdAndUpdate(
+      const result = await Task.findByIdAndUpdate(
         taskId,
         {is_deleted:true},
       );

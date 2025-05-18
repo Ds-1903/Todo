@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as taskService from "./task.service.js";
+import { ObjectId } from "mongoose";
 
 interface ReturnResponse {
   message: string;
@@ -8,7 +9,7 @@ interface ReturnResponse {
 }
 interface AuthenticatedRequest extends Request {
   user?: {
-    userId: string;
+    userId: ObjectId;
     email: string;
   };
 }
@@ -19,8 +20,14 @@ export const addTask = async (
   res: Response
 ): Promise<Response<ReturnResponse>> => {
   try {
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized", data: [] });
+    }
+
     const { body = {} } = req;
-    const { userId, email } = req.user;
+    const { userId } = req.user;
 
     body["user_id"] = userId;
     body["due_date"] = parseDateString(body.due_date);
@@ -46,6 +53,12 @@ export const getAllTask = async (
   res: Response
 ): Promise<Response<ReturnResponse>> => {
   try {
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized", data: [] });
+    }
+
     const { userId } = req.user;
 
     const { success, data } = await taskService.getAllTask(userId);
@@ -53,13 +66,13 @@ export const getAllTask = async (
     return res.send({
       success,
       message: success ? "Tasks fetched successfully" : "No data found!",
-      data: data || []
+      data: data || [],
     });
   } catch (error: any) {
     return res.status(500).send({
       success: false,
       message: error.message || "Internal server error",
-      data: []
+      data: [],
     });
   }
 };
@@ -73,30 +86,43 @@ export const updateTask = async (
     const { taskId } = req.params;
     const { body = {} } = req;
 
-    body.due_date? body["due_date"] = parseDateString(body.due_date) : body.due_date
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized", data: [] });
+    }
+    body.due_date
+      ? (body["due_date"] = parseDateString(body.due_date))
+      : body.due_date;
     const { success, data } = await taskService.updateTask(body, taskId);
 
     return res.send({
       success,
       message: success ? "Tasks updated successfully" : "No data found!",
-      data: data || []
+      data: data || [],
     });
   } catch (error: any) {
     return res.status(500).send({
       success: false,
       message: error.message || "Internal server error",
-      data: []
+      data: [],
     });
   }
 };
 
 //deleteTask
 export const deleteTask = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<Response<ReturnResponse>> => {
   try {
     const { taskId } = req.params;
+
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized", data: [] });
+    }
 
     const { success, data } = await taskService.deleteTask(taskId);
 
